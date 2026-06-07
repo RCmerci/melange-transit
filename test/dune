@@ -1,0 +1,21 @@
+(melange.emit
+ (target transit_melange)
+ (modules test_json)
+ (module_systems commonjs)
+ (libraries transit melange.js melange-jest.jest))
+
+(rule
+ (alias runtest)
+ (enabled_if
+  (= %{profile} dev))
+ (deps
+  (alias melange)
+  transit_melange/test/test_json.js)
+ (action
+  (chdir
+   %{workspace_root}
+   (run
+    npx
+    jest
+    --testMatch
+    **/_build/default/test/transit_melange/test/*.js))))

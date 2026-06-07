@@ -1,0 +1,10 @@
+{
+  "name": "melange-transit",
+  "private": true,
+  "scripts": {
+    "test": "dune runtest"
+  },
+  "devDependencies": {
+    "jest": "30.4.2"
+  }
+}

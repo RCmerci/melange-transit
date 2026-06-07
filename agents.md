@@ -1,0 +1,6 @@
+- going to implement a transit lib using ocaml
+- specification: https://github.com/cognitect/transit-format
+- Only implement JSON type
+- refer to the cljs impl: https://github.com/cognitect/transit-cljs
+- impl read from string, write to string
+- refer to cljs impl, add tests

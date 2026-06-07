@@ -1,0 +1,5 @@
+(library
+ (name transit)
+ (public_name melange-transit)
+ (modes melange)
+ (libraries melange-edn melange.js))
