@@ -317,7 +317,8 @@ module Json = struct
     | Melange_edn.String text -> String text
     | Melange_edn.Char uchar -> Char (string_of_uchar uchar)
     | Melange_edn.Symbol text -> Symbol text
-    | Melange_edn.Keyword text -> Keyword text
+    | Melange_edn.Keyword keyword ->
+        Keyword (Melange_edn.keyword_to_string keyword)
     | Melange_edn.Int value -> transit_int value
     | Melange_edn.Bigint text -> Big_int text
     | Melange_edn.Float value -> Float value

@@ -241,6 +241,10 @@ let () =
           check_value edn (Json.to_edn transit);
           check_value transit (Json.of_edn edn);
           Jest.pass);
+      Jest.test "converts EDN keywords parsed by melange-edn" (fun () ->
+          check_value (Keyword "my.ns/name")
+            (Json.of_edn (Edn.of_edn_string ":my.ns/name"));
+          Jest.pass);
       Jest.test "converts extension EDN values" (fun () ->
           let edn =
             edn_vector
