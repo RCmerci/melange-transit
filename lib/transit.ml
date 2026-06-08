@@ -246,14 +246,14 @@ module Json = struct
   let iarray_to_list render values =
     Iarray.fold_right (fun value acc -> render value :: acc) values []
 
-  let edn_any value = Melange_edn.Any value
-  let edn_string value = edn_any (Melange_edn.String value)
-  let edn_int value = edn_any (Melange_edn.Int value)
-  let edn_vector values = edn_any (Melange_edn.Vector (Iarray.of_list values))
-  let edn_list values = edn_any (Melange_edn.List (Iarray.of_list values))
-  let edn_set values = edn_any (Melange_edn.Set (Iarray.of_list values))
-  let edn_map entries = edn_any (Melange_edn.Map (Iarray.of_list entries))
-  let edn_tagged tag value = edn_any (Melange_edn.Tagged (tag, value))
+  let edn_any value = Melange_edn.any value
+  let edn_string value = edn_any (Melange_edn.string value)
+  let edn_int value = edn_any (Melange_edn.int value)
+  let edn_vector values = edn_any (Melange_edn.vector values)
+  let edn_list values = edn_any (Melange_edn.list values)
+  let edn_set values = edn_any (Melange_edn.set values)
+  let edn_map entries = edn_any (Melange_edn.map entries)
+  let edn_tagged tag value = edn_any (Melange_edn.tagged tag value)
 
   let uchar_of_string text =
     match String.get_utf_8_uchar text 0 with
@@ -274,21 +274,21 @@ module Json = struct
     | None -> Int64 value
 
   let rec to_edn = function
-    | Null -> edn_any Melange_edn.Nil
-    | Bool value -> edn_any (Melange_edn.Bool value)
+    | Null -> edn_any Melange_edn.nil
+    | Bool value -> edn_any (Melange_edn.bool value)
     | String text -> edn_string text
     | Int value -> edn_int (Int64.of_int value)
     | Int64 value -> edn_int value
-    | Float value -> edn_any (Melange_edn.Float value)
+    | Float value -> edn_any (Melange_edn.float value)
     | Bytes text -> edn_tagged "transit/bytes" (edn_string text)
-    | Keyword text -> edn_any (Melange_edn.Keyword text)
-    | Symbol text -> edn_any (Melange_edn.Symbol text)
-    | Big_decimal text -> edn_any (Melange_edn.Decimal text)
-    | Big_int text -> edn_any (Melange_edn.Bigint text)
+    | Keyword text -> edn_any (Melange_edn.keyword text)
+    | Symbol text -> edn_any (Melange_edn.symbol text)
+    | Big_decimal text -> edn_any (Melange_edn.decimal text)
+    | Big_int text -> edn_any (Melange_edn.bigint text)
     | Time milliseconds -> edn_tagged "transit/time" (edn_int milliseconds)
     | Uuid text -> edn_tagged "uuid" (edn_string text)
     | Uri text -> edn_tagged "transit/uri" (edn_string text)
-    | Char text -> edn_any (Melange_edn.Char (uchar_of_string text))
+    | Char text -> edn_any (Melange_edn.char (uchar_of_string text))
     | Array values -> edn_vector (List.map to_edn values)
     | Map entries -> edn_map (List.map (fun (key, value) -> (to_edn key, to_edn value)) entries)
     | Set values -> edn_set (List.map to_edn values)

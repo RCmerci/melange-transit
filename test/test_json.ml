@@ -20,21 +20,20 @@ let check_float expected = function
         (Printf.sprintf "expected float %.17g, got %s" expected
            (write actual))
 
-let any value = Edn.Any value
-let ia values = Iarray.of_list values
-let edn_nil = any Edn.Nil
-let edn_bool value = any (Edn.Bool value)
-let edn_string value = any (Edn.String value)
-let edn_char value = any (Edn.Char value)
-let edn_keyword value = any (Edn.Keyword value)
-let edn_int value = any (Edn.Int value)
-let edn_bigint value = any (Edn.Bigint value)
-let edn_decimal value = any (Edn.Decimal value)
-let edn_list values = any (Edn.List (ia values))
-let edn_vector values = any (Edn.Vector (ia values))
-let edn_set values = any (Edn.Set (ia values))
-let edn_map entries = any (Edn.Map (ia entries))
-let edn_tagged tag value = any (Edn.Tagged (tag, value))
+let any value = Edn.any value
+let edn_nil = any Edn.nil
+let edn_bool value = any (Edn.bool value)
+let edn_string value = any (Edn.string value)
+let edn_char value = any (Edn.char value)
+let edn_keyword value = any (Edn.keyword value)
+let edn_int value = any (Edn.int value)
+let edn_bigint value = any (Edn.bigint value)
+let edn_decimal value = any (Edn.decimal value)
+let edn_list values = any (Edn.list values)
+let edn_vector values = any (Edn.vector values)
+let edn_set values = any (Edn.set values)
+let edn_map entries = any (Edn.map entries)
+let edn_tagged tag value = any (Edn.tagged tag value)
 
 let () =
   Jest.describe "Transit JSON writer" (fun () ->

@@ -5,7 +5,7 @@ depends: [
   "dune" {>= "3.16"}
   "ocaml" {>= "5.4"}
   "melange"
-  "melange-edn"
+  "melange-edn" {= "0.2.0"}
   "melange-jest" {with-test}
   "odoc" {with-doc}
 ]
@@ -24,5 +24,5 @@ build: [
   ]
 ]
 pin-depends: [
-  ["melange-edn.dev" "git+https://github.com/RCmerci/melange-edn.git"]
+  ["melange-edn.0.2.0" "git+https://github.com/RCmerci/melange-edn.git#0.2.0"]
 ]

@@ -12,5 +12,5 @@
  (depends
   (ocaml  (>= 5.4))
   melange
-  melange-edn
+  (melange-edn (= 0.2.0))
   (melange-jest :with-test)))
