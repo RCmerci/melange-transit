@@ -20,6 +20,19 @@ let check_float expected = function
       failwith
         (Printf.sprintf "expected float %.17g, got %s" expected (write actual))
 
+let check_int64 expected = function
+  | Int64 actual when Int64.equal expected actual -> ()
+  | actual ->
+      failwith
+        (Printf.sprintf "expected int64 %s, got %s" (Int64.to_string expected)
+           (write actual))
+
+let check_int expected = function
+  | Int actual when actual = expected -> ()
+  | actual ->
+      failwith
+        (Printf.sprintf "expected int %d, got %s" expected (write actual))
+
 let any value = Edn.any value
 let edn_nil = any Edn.nil
 let edn_bool value = any (Edn.bool value)
@@ -96,7 +109,23 @@ let () =
           check_value Null (read "[\"~#'\",null]");
           check_value (Bool true) (read "[\"~#'\",true]");
           check_value (Int 42) (read "[\"~#'\",42]");
+          check_int 2_147_483_647 (read "[\"~#'\",2147483647]");
+          check_int (-2_147_483_648) (read "[\"~#'\",-2147483648]");
+          check_int64 2_147_483_648L (read "[\"~#'\",2147483648]");
+          check_int64 (-2_147_483_649L) (read "[\"~#'\",-2147483649]");
+          check_int64 9_007_199_254_740_992L
+            (read "[\"~#'\",9007199254740992]");
+          check_int64 1_777_063_533_827L
+            (read "{\"~:block/created-at\":1777063533827}"
+            |> function
+            | Map [ (Keyword "block/created-at", value) ] -> value
+            | value -> value);
           check_float 1.25 (read "[\"~#'\",1.25]");
+          check_float 1.5
+            (read "{\"~:block/score\":1.5}"
+            |> function
+            | Map [ (Keyword "block/score", value) ] -> value
+            | value -> value);
           check_value (String "hello") (read "[\"~#'\",\"hello\"]");
           check_value (Keyword "color") (read "[\"~#'\",\"~:color\"]");
           check_value (Symbol "thing") (read "[\"~#'\",\"~$thing\"]");

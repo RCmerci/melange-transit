@@ -165,12 +165,29 @@ module Json = struct
         | Some value -> Int64 value
         | None -> decode_error ("invalid Transit integer: " ^ text))
 
+  let min_melange_int_number = Float.of_int min_int
+  let max_melange_int_number = Float.of_int max_int
+  let min_int64_number = Int64.to_float Int64.min_int
+  let max_int64_number = Int64.to_float Int64.max_int
+
+  let int64_of_exact_number value =
+    if value >= min_int64_number && value <= max_int64_number then
+      let int64 = Int64.of_float value in
+      if Float.equal (Int64.to_float int64) value then Some int64 else None
+    else None
+
   let number_value value =
-    if value = floor value then
-      match int_of_string_opt (Js.Float.toString value) with
-      | Some int -> Int int
-      | None -> Float value
-    else Float value
+    match classify_float value with
+    | FP_normal | FP_subnormal | FP_zero when value = floor value ->
+        if
+          value >= min_melange_int_number
+          && value <= max_melange_int_number
+        then Int (int_of_float value)
+        else (
+          match int64_of_exact_number value with
+          | Some int64 -> Int64 int64
+          | None -> Float value)
+    | FP_normal | FP_subnormal | FP_zero | FP_nan | FP_infinite -> Float value
 
   let keyword_name value =
     let text = Transit_js.to_string value in
