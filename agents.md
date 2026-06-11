@@ -1,6 +1,2 @@
-- going to implement a transit lib using ocaml
-- specification: https://github.com/cognitect/transit-format
-- Only implement JSON type
-- refer to the cljs impl: https://github.com/cognitect/transit-cljs
-- impl read from string, write to string
-- refer to cljs impl, add tests
+- 把当前repo 改为melange的binding https://github.com/cognitect/transit-js
+- 保持目前的mli不变，如果mli不合理的话，就作为blocker报告

@@ -6,7 +6,7 @@ module Json : sig
     | Normal
     | Verbose
 
-  (** Transit semantic values supported by the JSON reader and writer. *)
+  (** Transit values represented by transit-js runtime kinds. *)
   type value =
     | Null
     | Bool of bool
@@ -14,20 +14,18 @@ module Json : sig
     | Int of int
     | Int64 of int64
     | Float of float
-    | Bytes of string
+    | Binary of string
     | Keyword of string
     | Symbol of string
     | Big_decimal of string
     | Big_int of string
-    | Time of int64
+    | Date of int64
     | Uuid of string
     | Uri of string
-    | Char of string
     | Array of value list
     | Map of (value * value) list
     | Set of value list
     | List of value list
-    | Quote of value
     | Tagged of string * value
 
   exception Decode_error of string
