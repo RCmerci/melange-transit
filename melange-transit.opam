@@ -23,6 +23,3 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-pin-depends: [
-  ["melange-edn.0.3.0" "git+https://github.com/RCmerci/melange-edn.git#0.3.0"]
-]
