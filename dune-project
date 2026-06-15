@@ -3,6 +3,7 @@
 (using melange 0.1)
 
 (name melange-transit)
+(version 0.1.0)
 
 (generate_opam_files true)
 
