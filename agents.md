@@ -1,2 +1,0 @@
-- 把当前repo 改为melange的binding https://github.com/cognitect/transit-js
-- 保持目前的mli不变，如果mli不合理的话，就作为blocker报告
