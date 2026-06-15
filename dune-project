@@ -9,6 +9,13 @@
 (package
  (name melange-transit)
  (synopsis "Transit JSON reader and writer for Melange")
+ (description "melange-transit reads and writes Transit JSON values for Melange.")
+ (maintainers "rcmerci <rcmerci@gmail.com>")
+ (authors "rcmerci")
+ (license MIT)
+ (homepage "https://github.com/RCmerci/melange-transit")
+ (bug_reports "https://github.com/RCmerci/melange-transit/issues")
+ (source (github RCmerci/melange-transit))
  (depends
   (ocaml  (>= 5.4))
   melange
