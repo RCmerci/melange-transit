@@ -265,8 +265,8 @@ module Json = struct
 
   let of_json json = json |> Js.Json.stringify |> of_string
 
-  let iarray_to_list render values =
-    Iarray.fold_right (fun value acc -> render value :: acc) values []
+  let array_to_list render values =
+    Array.fold_right (fun value acc -> render value :: acc) values []
 
   let edn_any value = Melange_edn.any value
   let edn_string value = edn_any (Melange_edn.string value)
@@ -331,14 +331,16 @@ module Json = struct
     | Melange_edn.Bigint text -> Big_int text
     | Melange_edn.Float value -> Float value
     | Melange_edn.Decimal text -> Big_decimal text
-    | Melange_edn.List values -> List (iarray_to_list of_edn values)
-    | Melange_edn.Vector values -> Array (iarray_to_list of_edn values)
+    | Melange_edn.Ratio text -> Tagged ("edn/ratio", String text)
+    | Melange_edn.Regex pattern -> Tagged ("edn/regex", String pattern)
+    | Melange_edn.List values -> List (array_to_list of_edn values)
+    | Melange_edn.Vector values -> Array (array_to_list of_edn values)
     | Melange_edn.Map entries ->
         Map
-          (iarray_to_list
+          (array_to_list
              (fun (key, value) -> (of_edn key, of_edn value))
              entries)
-    | Melange_edn.Set values -> Set (iarray_to_list of_edn values)
+    | Melange_edn.Set values -> Set (array_to_list of_edn values)
     | Melange_edn.Tagged ("transit/bytes", value) ->
         Binary (string_of_edn "transit/bytes" value)
     | Melange_edn.Tagged ("transit/time", value) ->

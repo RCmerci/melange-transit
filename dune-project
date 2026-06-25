@@ -18,7 +18,7 @@
  (bug_reports "https://github.com/RCmerci/melange-transit/issues")
  (source (github RCmerci/melange-transit))
  (depends
-  (ocaml  (>= 5.4))
+  (ocaml  (>= 5.2))
   melange
-  (melange-edn (= 0.3.0))
+  (melange-edn (= 0.4.0))
   (melange-jest :with-test)))

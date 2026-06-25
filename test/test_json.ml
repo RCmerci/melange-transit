@@ -204,6 +204,16 @@ let () =
           check_value (Keyword "my.ns/name")
             (Json.of_edn (Edn.of_edn_string ":my.ns/name"));
           Jest.pass);
+      Jest.test "converts EDN values added in melange-edn master" (fun () ->
+          check_value (Tagged ("edn/ratio", String "22/7"))
+            (Json.of_edn (Edn.of_edn_string "22/7"));
+          check_value (Tagged ("edn/regex", String "[a-z]+"))
+            (Json.of_edn (Edn.of_edn_string "#\"[a-z]+\""));
+          check_value (edn_tagged "edn/ratio" (edn_string "22/7"))
+            (Json.to_edn (Tagged ("edn/ratio", String "22/7")));
+          check_value (edn_tagged "edn/regex" (edn_string "[a-z]+"))
+            (Json.to_edn (Tagged ("edn/regex", String "[a-z]+")));
+          Jest.pass);
       Jest.test "converts extension EDN values" (fun () ->
           let edn =
             edn_vector
