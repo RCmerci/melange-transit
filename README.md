@@ -1,12 +1,12 @@
 # melange-transit
 
-Transit JSON reader and writer bindings for Melange.
+Transit JSON reader and writer for native OCaml, js_of_ocaml, and Melange.
 
-This library wraps the
+The js_of_ocaml and Melange backends wrap the
 [cognitect/transit-js](https://github.com/cognitect/transit-js) JSON reader and
-writer while exposing OCaml values through the existing `Transit.Json` API.
-MessagePack is intentionally out of scope because `transit-js` does not support
-MessagePack encoding.
+writer. The native OCaml backend implements the same Transit JSON behavior in
+OCaml. MessagePack is intentionally out of scope because `transit-js` does not
+support MessagePack encoding.
 
 The `Transit.Json.value` constructors mirror the transit-js runtime kinds that
 can be represented consistently: `Binary` maps to transit-js binary values, and
@@ -16,23 +16,35 @@ values because the transit-js reader unwraps them.
 
 ## Usage
 
+Use the platform library that matches your target:
+
+- `melange-transit.native` for native OCaml
+- `melange-transit.jsoo` for js_of_ocaml
+- `melange-transit.melange` for Melange
+- `melange-transit.common` for shared value types and signatures
+
+All three backends expose the same `Transit.Json` value API under their wrapped
+library module:
+
 ```ocaml
+module Json = Transit_native.Transit.Json
+
 let payload =
-  Transit.Json.Map
+  Json.Map
     [
-      (Transit.Json.Keyword "name", Transit.Json.String "Ada");
-      (Transit.Json.Keyword "roles", Transit.Json.Array [ Transit.Json.String "admin" ]);
+      (Json.Keyword "name", Json.String "Ada");
+      (Json.Keyword "roles", Json.Array [ Json.String "admin" ]);
     ]
 
-let json = Transit.Json.to_string payload
-let decoded = Transit.Json.of_string json
+let json = Json.to_string payload
+let decoded = Json.of_string json
 ```
 
 Normal JSON mode uses `transit.writer("json")`. Verbose mode uses
 `transit.writer("json-verbose")`:
 
 ```ocaml
-let json = Transit.Json.to_string ~mode:Transit.Json.Verbose payload
+let json = Json.to_string ~mode:Json.Verbose payload
 ```
 
 `transit-js` runtime semantics are preserved. For example, top-level scalar
@@ -44,3 +56,6 @@ semantics, and `json-verbose` date values are written as ISO timestamps.
 ```sh
 dune runtest
 ```
+
+`dune runtest` runs the same fixed and QCheck-generated cases through native,
+js_of_ocaml, and Melange, then diffs their encoded output.

@@ -1,0 +1,6 @@
+(library
+ (name transit_jsoo)
+ (public_name melange-transit.jsoo)
+ (modules transit)
+ (modes byte)
+ (libraries transit_common js_of_ocaml))

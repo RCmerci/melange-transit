@@ -1,7 +1,0 @@
-(library
- (name transit)
- (public_name melange-transit)
- (modes melange)
- (preprocess
-  (pps melange.ppx))
- (libraries melange-edn melange.js))

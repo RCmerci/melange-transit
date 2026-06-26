@@ -1,21 +1,45 @@
+(executable
+ (name gen_random_cases)
+ (modules gen_random_cases)
+ (libraries qcheck-core transit_common))
+
+(rule
+ (targets random_cases.ml)
+ (deps gen_random_cases.exe)
+ (action
+  (run ./gen_random_cases.exe %{targets})))
+
+(executable
+ (name test_native)
+ (modules test_shared random_cases test_native)
+ (libraries transit_native transit_common))
+
+(executable
+ (name test_jsoo)
+ (modes js)
+ (modules test_shared random_cases test_jsoo)
+ (libraries transit_jsoo transit_common))
+
 (melange.emit
  (target transit_melange)
- (modules test_json)
+ (modules test_shared random_cases test_melange)
  (module_systems commonjs)
- (libraries transit melange.js melange-jest.jest))
+ (libraries transit_melange transit_common))
 
 (rule
  (alias runtest)
- (enabled_if
-  (= %{profile} dev))
  (deps
+  test_native.exe
+  test_jsoo.bc.js
   (alias melange)
-  transit_melange/test/test_json.js)
+  transit_melange/test/test_melange.js)
  (action
-  (chdir
-   %{workspace_root}
-   (run
-    npx
-    jest
-    --testMatch
-    **/_build/default/test/transit_melange/test/*.js))))
+  (progn
+   (with-stdout-to native.out
+    (run ./test_native.exe))
+   (with-stdout-to jsoo.out
+    (run node ./test_jsoo.bc.js))
+   (with-stdout-to melange.out
+    (run node ./transit_melange/test/test_melange.js))
+   (run diff -u native.out jsoo.out)
+   (run diff -u native.out melange.out))))

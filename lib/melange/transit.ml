@@ -1,30 +1,5 @@
 module Json = struct
-  type mode =
-    | Normal
-    | Verbose
-
-  type value =
-    | Null
-    | Bool of bool
-    | String of string
-    | Int of int
-    | Int64 of int64
-    | Float of float
-    | Binary of string
-    | Keyword of string
-    | Symbol of string
-    | Big_decimal of string
-    | Big_int of string
-    | Date of int64
-    | Uuid of string
-    | Uri of string
-    | Array of value list
-    | Map of (value * value) list
-    | Set of value list
-    | List of value list
-    | Tagged of string * value
-
-  exception Decode_error of string
+  include Transit_common.Transit_types.Json
 
   module Transit_js = struct
     type t
@@ -84,13 +59,6 @@ module Json = struct
     external length : t -> int = "length" [@@mel.get]
     external get_index : t -> int -> int = "" [@@mel.get_index]
   end
-
-  let decode_error message = raise (Decode_error message)
-
-  let protect_decode f =
-    try f () with
-    | Decode_error _ as exn -> raise exn
-    | exn -> decode_error (Printexc.to_string exn)
 
   let mode_type = function
     | Normal -> "json"
@@ -157,14 +125,6 @@ module Json = struct
     | List values -> values |> List.map to_js |> Array.of_list |> Transit_js.list
     | Tagged (tag, value) -> Transit_js.tagged tag (to_js value)
 
-  let transit_int text =
-    match int_of_string_opt text with
-    | Some value -> Int value
-    | None -> (
-        match Int64.of_string_opt text with
-        | Some value -> Int64 value
-        | None -> decode_error ("invalid Transit integer: " ^ text))
-
   let min_melange_int_number = Float.of_int min_int
   let max_melange_int_number = Float.of_int max_int
   let min_int64_number = Int64.to_float Int64.min_int
@@ -178,7 +138,7 @@ module Json = struct
 
   let number_value value =
     match classify_float value with
-    | FP_normal | FP_subnormal | FP_zero when value = floor value ->
+    | FP_normal | FP_subnormal | FP_zero when Float.equal value (floor value) ->
         if
           value >= min_melange_int_number
           && value <= max_melange_int_number
@@ -210,7 +170,8 @@ module Json = struct
     | JSONString text -> String text
     | JSONNumber number -> number_value number
     | JSONArray values ->
-        Array (values |> Array.to_list |> List.map (fun value -> of_js (Obj.magic value)))
+        Array
+          (values |> Array.to_list |> List.map (fun value -> of_js (Obj.magic value)))
     | JSONObject object_ ->
         if Transit_js.is_keyword value then Keyword (keyword_name value)
         else if Transit_js.is_symbol value then Symbol (Transit_js.to_string value)
@@ -224,10 +185,8 @@ module Json = struct
         else if Transit_js.is_list value then List (tagged_array_rep value)
         else if Transit_js.is_tagged_value value then
           Tagged (Transit_js.tag value, of_js (Transit_js.rep value))
-        else if is_date value then
-          Date (Int64.of_float (Transit_js.get_time value))
-        else if Transit_js.is_integer value then
-          transit_int (Transit_js.to_string value)
+        else if is_date value then Date (Int64.of_float (Transit_js.get_time value))
+        else if Transit_js.is_integer value then transit_int (Transit_js.to_string value)
         else
           Map
             (object_ |> Js.Dict.entries |> Array.to_list
@@ -248,13 +207,11 @@ module Json = struct
     match Js.Json.classify (Obj.magic (Transit_js.rep value)) with
     | JSONArray values ->
         values |> Array.to_list |> List.map (fun value -> of_js (Obj.magic value))
-    | _ -> decode_error ("Transit list expects an array representation")
+    | _ -> decode_error "Transit list expects an array representation"
 
   let to_string ?(mode = Normal) value =
     Transit_js.writer (mode_type mode) |> fun writer ->
     Transit_js.write writer (to_js value)
-
-  let to_json ?mode value = value |> to_string ?mode |> Js.Json.parseExn
 
   let of_string text =
     protect_decode (fun () ->
@@ -262,91 +219,4 @@ module Json = struct
           Transit_js.reader "json" (Transit_js.reader_options ~preferBuffers:false ())
         in
         Transit_js.read reader text |> of_js)
-
-  let of_json json = json |> Js.Json.stringify |> of_string
-
-  let array_to_list render values =
-    Array.fold_right (fun value acc -> render value :: acc) values []
-
-  let edn_any value = Melange_edn.any value
-  let edn_string value = edn_any (Melange_edn.string value)
-  let edn_int value = edn_any (Melange_edn.int value)
-  let edn_vector values = edn_any (Melange_edn.vector values)
-  let edn_list values = edn_any (Melange_edn.list values)
-  let edn_set values = edn_any (Melange_edn.set values)
-  let edn_map entries = edn_any (Melange_edn.map entries)
-  let edn_tagged tag value = edn_any (Melange_edn.tagged tag value)
-
-  let string_of_uchar uchar =
-    let buffer = Buffer.create 4 in
-    Buffer.add_utf_8_uchar buffer uchar;
-    Buffer.contents buffer
-
-  let rec to_edn = function
-    | Null -> edn_any Melange_edn.nil
-    | Bool value -> edn_any (Melange_edn.bool value)
-    | String text -> edn_string text
-    | Int value -> edn_int (Int64.of_int value)
-    | Int64 value -> edn_int value
-    | Float value -> edn_any (Melange_edn.float value)
-    | Binary text -> edn_tagged "transit/bytes" (edn_string text)
-    | Keyword text -> edn_any (Melange_edn.keyword text)
-    | Symbol text -> edn_any (Melange_edn.symbol text)
-    | Big_decimal text -> edn_any (Melange_edn.decimal text)
-    | Big_int text -> edn_any (Melange_edn.bigint text)
-    | Date milliseconds -> edn_tagged "transit/time" (edn_int milliseconds)
-    | Uuid text -> edn_tagged "uuid" (edn_string text)
-    | Uri text -> edn_tagged "transit/uri" (edn_string text)
-    | Array values -> edn_vector (List.map to_edn values)
-    | Map entries ->
-        edn_map (List.map (fun (key, value) -> (to_edn key, to_edn value)) entries)
-    | Set values -> edn_set (List.map to_edn values)
-    | List values -> edn_list (List.map to_edn values)
-    | Tagged (tag, value) -> edn_tagged tag (to_edn value)
-
-  let int64_of_edn tag = function
-    | Melange_edn.Any (Melange_edn.Int value) -> value
-    | value ->
-        decode_error
-          (Printf.sprintf "%s tag expects an integer, got %s" tag
-             (Melange_edn.to_edn_string value))
-
-  let string_of_edn tag = function
-    | Melange_edn.Any (Melange_edn.String value) -> value
-    | value ->
-        decode_error
-          (Printf.sprintf "%s tag expects a string, got %s" tag
-             (Melange_edn.to_edn_string value))
-
-  let rec of_edn (Melange_edn.Any value) =
-    match value with
-    | Melange_edn.Nil -> Null
-    | Melange_edn.Bool value -> Bool value
-    | Melange_edn.String text -> String text
-    | Melange_edn.Char uchar -> String (string_of_uchar uchar)
-    | Melange_edn.Symbol text -> Symbol text
-    | Melange_edn.Keyword keyword ->
-        Keyword (Melange_edn.keyword_to_string keyword)
-    | Melange_edn.Int value -> transit_int (Int64.to_string value)
-    | Melange_edn.Bigint text -> Big_int text
-    | Melange_edn.Float value -> Float value
-    | Melange_edn.Decimal text -> Big_decimal text
-    | Melange_edn.Ratio text -> Tagged ("edn/ratio", String text)
-    | Melange_edn.Regex pattern -> Tagged ("edn/regex", String pattern)
-    | Melange_edn.List values -> List (array_to_list of_edn values)
-    | Melange_edn.Vector values -> Array (array_to_list of_edn values)
-    | Melange_edn.Map entries ->
-        Map
-          (array_to_list
-             (fun (key, value) -> (of_edn key, of_edn value))
-             entries)
-    | Melange_edn.Set values -> Set (array_to_list of_edn values)
-    | Melange_edn.Tagged ("transit/bytes", value) ->
-        Binary (string_of_edn "transit/bytes" value)
-    | Melange_edn.Tagged ("transit/time", value) ->
-        Date (int64_of_edn "transit/time" value)
-    | Melange_edn.Tagged ("uuid", value) -> Uuid (string_of_edn "uuid" value)
-    | Melange_edn.Tagged ("transit/uri", value) ->
-        Uri (string_of_edn "transit/uri" value)
-    | Melange_edn.Tagged (tag, value) -> Tagged (tag, of_edn value)
 end

@@ -4,9 +4,6 @@
   "scripts": {
     "test": "dune runtest"
   },
-  "devDependencies": {
-    "jest": "30.4.2"
-  },
   "dependencies": {
     "transit-js": "0.8.874"
   }

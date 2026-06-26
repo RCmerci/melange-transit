@@ -1,0 +1,6 @@
+(library
+ (name transit_common)
+ (public_name melange-transit.common)
+ (modules transit_types transit_intf)
+ (modes byte native melange)
+ (libraries melange-edn))
