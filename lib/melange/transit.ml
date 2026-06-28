@@ -2,6 +2,13 @@ module Json = struct
   include Transit_core.Json
   open Internal
 
+  type edn = Melange_edn_melange.any
+
+  module Edn = Transit_edn.Make (Melange_edn_melange)
+
+  let to_edn = Edn.to_edn
+  let of_edn = Edn.of_edn
+
   module Transit_js = struct
     type t
     type reader

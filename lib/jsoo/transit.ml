@@ -4,6 +4,13 @@ module Json = struct
   include Transit_core.Json
   open Internal
 
+  type edn = Melange_edn_jsoo.any
+
+  module Edn = Transit_edn.Make (Melange_edn_jsoo)
+
+  let to_edn = Edn.to_edn
+  let of_edn = Edn.of_edn
+
   module Unsafe = Js.Unsafe
 
   let js_string text = Unsafe.inject (Js.string text)

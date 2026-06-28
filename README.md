@@ -18,7 +18,7 @@ values because the transit-js reader unwraps them.
 
 Use the platform library that matches your target:
 
-- `melange-transit-core` for shared Transit JSON types and EDN conversion
+- `melange-transit-core` for shared Transit JSON types and helpers
 - `melange-transit-native` for native OCaml
 - `melange-transit-jsoo` for js_of_ocaml
 - `melange-transit-melange` for Melange

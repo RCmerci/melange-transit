@@ -9,9 +9,9 @@
 
 (package
  (name melange-transit-core)
- (synopsis "Platform-independent Transit JSON types and EDN conversion")
+ (synopsis "Platform-independent Transit JSON types and helpers")
  (description
-  "melange-transit-core provides shared Transit JSON types and EDN conversion.")
+  "melange-transit-core provides shared Transit JSON types and helpers.")
  (maintainers "rcmerci <rcmerci@gmail.com>")
  (authors "rcmerci")
  (license MIT)
@@ -19,8 +19,7 @@
  (bug_reports "https://github.com/RCmerci/melange-transit/issues")
  (source (github RCmerci/melange-transit))
  (depends
-  (ocaml  (>= 5.2))
-  (melange-edn-core (= 0.5.0))))
+  (ocaml  (>= 5.2))))
 
 (package
  (name melange-transit-melange)
@@ -36,6 +35,7 @@
   (ocaml  (>= 5.2))
   melange
   (melange-transit-core (= :version))
+  (melange-edn-melange (= 0.5.0))
   (qcheck :with-test)))
 
 (package
@@ -52,6 +52,8 @@
   (ocaml  (>= 5.2))
   js_of_ocaml
   (melange-transit-core (= :version))
+  (melange-edn-core (= 0.5.0))
+  (melange-edn-jsoo (= 0.5.0))
   (qcheck :with-test)))
 
 (package
@@ -67,6 +69,8 @@
  (depends
   (ocaml  (>= 5.2))
   (melange-transit-core (= :version))
+  (melange-edn-core (= 0.5.0))
+  (melange-edn-native (= 0.5.0))
   ptime
   (qcheck :with-test)
   yojson))

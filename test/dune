@@ -1,7 +1,7 @@
 (executable
  (name gen_random_cases)
  (modules gen_random_cases)
- (libraries qcheck-core transit_core))
+ (libraries qcheck-core melange-transit-core))
 
 (rule
  (targets random_cases.ml)

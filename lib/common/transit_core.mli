@@ -36,11 +36,11 @@ module Json : sig
     val keyword_name : string -> string
   end
 
-  val to_edn : value -> Melange_edn.any
-  val of_edn : Melange_edn.any -> value
 end
 
 module type Backend = sig
+  type edn
+
   type mode = Json.mode =
     | Normal
     | Verbose
@@ -69,7 +69,7 @@ module type Backend = sig
   exception Decode_error of string
 
   val to_string : ?mode:mode -> value -> string
-  val to_edn : value -> Melange_edn.any
+  val to_edn : value -> edn
   val of_string : string -> value
-  val of_edn : Melange_edn.any -> value
+  val of_edn : edn -> value
 end

@@ -2,5 +2,4 @@
  (name transit_core)
  (public_name melange-transit-core)
  (modules transit_core)
- (modes byte native melange)
- (libraries melange-edn-core))
+ (modes byte native))

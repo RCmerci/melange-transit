@@ -1,6 +1,10 @@
+(copy_files ../shared/transit_edn.ml)
+(copy_files ../shared/transit_edn.mli)
+
 (library
  (name transit_jsoo)
  (public_name melange-transit-jsoo)
- (modules transit)
+ (modules transit transit_edn)
+ (private_modules transit_edn)
  (modes byte)
- (libraries transit_core js_of_ocaml))
+ (libraries melange-transit-core melange-edn-core melange-edn-jsoo js_of_ocaml))

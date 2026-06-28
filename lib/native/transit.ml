@@ -2,6 +2,13 @@ module Json = struct
   include Transit_core.Json
   open Internal
 
+  type edn = Melange_edn_native.any
+
+  module Edn = Transit_edn.Make (Melange_edn_native)
+
+  let to_edn = Edn.to_edn
+  let of_edn = Edn.of_edn
+
   let max_safe_integer = 9_007_199_254_740_991L
   let min_safe_integer = Int64.neg max_safe_integer
   let min_ocaml_int = Int64.of_int min_int

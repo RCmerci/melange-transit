@@ -1,8 +1,14 @@
+(copy_files ../common/transit_core.ml)
+(copy_files ../common/transit_core.mli)
+(copy_files ../shared/transit_edn.ml)
+(copy_files ../shared/transit_edn.mli)
+
 (library
  (name transit_melange)
  (public_name melange-transit-melange)
- (modules transit)
+ (modules transit transit_core transit_edn)
+ (private_modules transit_edn)
  (modes melange)
  (preprocess
   (pps melange.ppx))
- (libraries transit_core melange.js))
+ (libraries melange-edn-melange melange.js))
