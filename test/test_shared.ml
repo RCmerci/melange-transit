@@ -1,9 +1,9 @@
 module type Json = sig
-  type mode = Transit_common.Transit_types.Json.mode =
+  type mode =
     | Normal
     | Verbose
 
-  type value = Transit_common.Transit_types.Json.value =
+  type value =
     | Null
     | Bool of bool
     | String of string
@@ -32,6 +32,30 @@ end
 
 module Make (Json : Json) = struct
   open Json
+
+  let random_constructors =
+    Random_cases.
+      {
+        null = Null;
+        bool = (fun value -> Bool value);
+        string = (fun value -> String value);
+        int = (fun value -> Int value);
+        int64 = (fun value -> Int64 value);
+        float = (fun value -> Float value);
+        binary = (fun value -> Binary value);
+        keyword = (fun value -> Keyword value);
+        symbol = (fun value -> Symbol value);
+        big_decimal = (fun value -> Big_decimal value);
+        big_int = (fun value -> Big_int value);
+        date = (fun value -> Date value);
+        uuid = (fun value -> Uuid value);
+        uri = (fun value -> Uri value);
+        array = (fun values -> Array values);
+        map = (fun entries -> Map entries);
+        set = (fun values -> Set values);
+        list_ = (fun values -> List values);
+        tagged = (fun (tag, value) -> Tagged (tag, value));
+      }
 
   let fail message = failwith message
 
@@ -188,5 +212,5 @@ module Make (Json : Json) = struct
           (Printf.sprintf "random-verbose-roundtrip-%d" index)
           value verbose_roundtrip;
         Printf.printf "%03d\t%s\t%s\n" index (escaped normal) (escaped verbose))
-      Random_cases.values
+      (Random_cases.values random_constructors)
 end

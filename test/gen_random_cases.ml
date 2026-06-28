@@ -1,4 +1,4 @@
-open Transit_common.Transit_types.Json
+open Transit_core.Json
 
 module Gen = QCheck2.Gen
 
@@ -68,39 +68,39 @@ and keyed_map values =
 let escape_ocaml_string text = Printf.sprintf "%S" text
 
 let rec value_expr = function
-  | Null -> "Null"
-  | Bool value -> Printf.sprintf "Bool %b" value
-  | String value -> Printf.sprintf "String %s" (escape_ocaml_string value)
-  | Int value -> Printf.sprintf "Int (%d)" value
-  | Int64 value -> Printf.sprintf "Int64 (%LdL)" value
-  | Float value -> Printf.sprintf "Float (%s)" (Float.to_string value)
-  | Binary value -> Printf.sprintf "Binary %s" (escape_ocaml_string value)
-  | Keyword value -> Printf.sprintf "Keyword %s" (escape_ocaml_string value)
-  | Symbol value -> Printf.sprintf "Symbol %s" (escape_ocaml_string value)
+  | Null -> "c.null"
+  | Bool value -> Printf.sprintf "c.bool %b" value
+  | String value -> Printf.sprintf "c.string %s" (escape_ocaml_string value)
+  | Int value -> Printf.sprintf "c.int (%d)" value
+  | Int64 value -> Printf.sprintf "c.int64 (%LdL)" value
+  | Float value -> Printf.sprintf "c.float (%s)" (Float.to_string value)
+  | Binary value -> Printf.sprintf "c.binary %s" (escape_ocaml_string value)
+  | Keyword value -> Printf.sprintf "c.keyword %s" (escape_ocaml_string value)
+  | Symbol value -> Printf.sprintf "c.symbol %s" (escape_ocaml_string value)
   | Big_decimal value ->
-      Printf.sprintf "Big_decimal %s" (escape_ocaml_string value)
-  | Big_int value -> Printf.sprintf "Big_int %s" (escape_ocaml_string value)
-  | Date value -> Printf.sprintf "Date (%LdL)" value
-  | Uuid value -> Printf.sprintf "Uuid %s" (escape_ocaml_string value)
-  | Uri value -> Printf.sprintf "Uri %s" (escape_ocaml_string value)
+      Printf.sprintf "c.big_decimal %s" (escape_ocaml_string value)
+  | Big_int value -> Printf.sprintf "c.big_int %s" (escape_ocaml_string value)
+  | Date value -> Printf.sprintf "c.date (%LdL)" value
+  | Uuid value -> Printf.sprintf "c.uuid %s" (escape_ocaml_string value)
+  | Uri value -> Printf.sprintf "c.uri %s" (escape_ocaml_string value)
   | Array values ->
-      Printf.sprintf "Array [ %s ]"
+      Printf.sprintf "c.array [ %s ]"
         (String.concat "; " (List.map value_expr values))
   | Map entries ->
-      Printf.sprintf "Map [ %s ]"
+      Printf.sprintf "c.map [ %s ]"
         (String.concat "; "
            (List.map
               (fun (key, value) ->
                 Printf.sprintf "(%s, %s)" (value_expr key) (value_expr value))
               entries))
   | Set values ->
-      Printf.sprintf "Set [ %s ]"
+      Printf.sprintf "c.set [ %s ]"
         (String.concat "; " (List.map value_expr values))
   | List values ->
-      Printf.sprintf "List [ %s ]"
+      Printf.sprintf "c.list_ [ %s ]"
         (String.concat "; " (List.map value_expr values))
   | Tagged (tag, value) ->
-      Printf.sprintf "Tagged (%s, %s)" (escape_ocaml_string tag)
+      Printf.sprintf "c.tagged (%s, %s)" (escape_ocaml_string tag)
         (value_expr value)
 
 let () =
@@ -108,8 +108,28 @@ let () =
   let random = Random.State.make [| 0x5472616e; 0x736974 |] in
   let values = Gen.generate ~rand:random ~n:64 (value 3) in
   let channel = open_out output in
-  output_string channel "open Transit_common.Transit_types.Json\n\n";
-  output_string channel "let values : value list =\n";
+  output_string channel "type 'value constructors = {\n";
+  output_string channel "  null : 'value;\n";
+  output_string channel "  bool : bool -> 'value;\n";
+  output_string channel "  string : string -> 'value;\n";
+  output_string channel "  int : int -> 'value;\n";
+  output_string channel "  int64 : int64 -> 'value;\n";
+  output_string channel "  float : float -> 'value;\n";
+  output_string channel "  binary : string -> 'value;\n";
+  output_string channel "  keyword : string -> 'value;\n";
+  output_string channel "  symbol : string -> 'value;\n";
+  output_string channel "  big_decimal : string -> 'value;\n";
+  output_string channel "  big_int : string -> 'value;\n";
+  output_string channel "  date : int64 -> 'value;\n";
+  output_string channel "  uuid : string -> 'value;\n";
+  output_string channel "  uri : string -> 'value;\n";
+  output_string channel "  array : 'value list -> 'value;\n";
+  output_string channel "  map : ('value * 'value) list -> 'value;\n";
+  output_string channel "  set : 'value list -> 'value;\n";
+  output_string channel "  list_ : 'value list -> 'value;\n";
+  output_string channel "  tagged : string * 'value -> 'value;\n";
+  output_string channel "}\n\n";
+  output_string channel "let values c =\n";
   output_string channel "  [\n";
   List.iter
     (fun value ->

@@ -18,13 +18,13 @@ values because the transit-js reader unwraps them.
 
 Use the platform library that matches your target:
 
-- `melange-transit.native` for native OCaml
-- `melange-transit.jsoo` for js_of_ocaml
-- `melange-transit.melange` for Melange
-- `melange-transit.common` for shared value types and signatures
+- `melange-transit-core` for shared Transit JSON types and EDN conversion
+- `melange-transit-native` for native OCaml
+- `melange-transit-jsoo` for js_of_ocaml
+- `melange-transit-melange` for Melange
 
-All three backends expose the same `Transit.Json` value API under their wrapped
-library module:
+The platform backends depend on `melange-transit-core` and expose the same
+`Transit.Json` value API under their wrapped library module:
 
 ```ocaml
 module Json = Transit_native.Transit.Json
@@ -54,8 +54,9 @@ semantics, and `json-verbose` date values are written as ISO timestamps.
 ## Development
 
 ```sh
-dune runtest
+dune build @runtest @test/cross-runtest
 ```
 
-`dune runtest` runs the same fixed and QCheck-generated cases through native,
-js_of_ocaml, and Melange, then diffs their encoded output.
+`@runtest` runs the fixed and QCheck-generated cases for each backend.
+`@test/cross-runtest` diffs the encoded output across native, js_of_ocaml, and
+Melange.

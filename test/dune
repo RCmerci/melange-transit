@@ -1,7 +1,7 @@
 (executable
  (name gen_random_cases)
  (modules gen_random_cases)
- (libraries qcheck-core transit_common))
+ (libraries qcheck-core transit_core))
 
 (rule
  (targets random_cases.ml)
@@ -12,34 +12,62 @@
 (executable
  (name test_native)
  (modules test_shared random_cases test_native)
- (libraries transit_native transit_common))
+ (libraries transit_native))
 
 (executable
  (name test_jsoo)
  (modes js)
  (modules test_shared random_cases test_jsoo)
- (libraries transit_jsoo transit_common))
+ (libraries transit_jsoo))
 
 (melange.emit
  (target transit_melange)
  (modules test_shared random_cases test_melange)
  (module_systems commonjs)
- (libraries transit_melange transit_common))
+ (libraries transit_melange))
 
 (rule
  (alias runtest)
+ (package melange-transit-native)
+ (targets native.out)
+ (deps test_native.exe)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./test_native.exe))))
+
+(rule
+ (alias runtest)
+ (package melange-transit-jsoo)
+ (enabled_if
+  (= %{profile} dev))
+ (targets jsoo.out)
+ (deps test_jsoo.bc.js)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run node ./test_jsoo.bc.js))))
+
+(rule
+ (alias runtest)
+ (package melange-transit-melange)
+ (enabled_if
+  (= %{profile} dev))
+ (targets melange.out)
  (deps
-  test_native.exe
-  test_jsoo.bc.js
   (alias melange)
   transit_melange/test/test_melange.js)
  (action
+  (with-stdout-to
+   %{targets}
+   (run node ./transit_melange/test/test_melange.js))))
+
+(rule
+ (alias cross-runtest)
+ (enabled_if
+  (= %{profile} dev))
+ (deps native.out jsoo.out melange.out)
+ (action
   (progn
-   (with-stdout-to native.out
-    (run ./test_native.exe))
-   (with-stdout-to jsoo.out
-    (run node ./test_jsoo.bc.js))
-   (with-stdout-to melange.out
-    (run node ./transit_melange/test/test_melange.js))
    (run diff -u native.out jsoo.out)
    (run diff -u native.out melange.out))))

@@ -1,6 +1,6 @@
 (library
  (name transit_native)
- (public_name melange-transit.native)
+ (public_name melange-transit-native)
  (modules transit)
  (modes byte native)
- (libraries transit_common yojson ptime))
+ (libraries transit_core yojson ptime))

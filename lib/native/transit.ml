@@ -1,5 +1,6 @@
 module Json = struct
-  include Transit_common.Transit_types.Json
+  include Transit_core.Json
+  open Internal
 
   let max_safe_integer = 9_007_199_254_740_991L
   let min_safe_integer = Int64.neg max_safe_integer
@@ -91,30 +92,6 @@ module Json = struct
       match text.[0] with
       | '~' | '^' | '`' -> "~" ^ text
       | _ -> text
-
-  let base64_encode text =
-    let alphabet =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-    in
-    let len = String.length text in
-    let output = Buffer.create (((len + 2) / 3) * 4) in
-    let add index = Buffer.add_char output alphabet.[index] in
-    let rec loop offset =
-      if offset < len then (
-        let b0 = Char.code text.[offset] in
-        let has_b1 = offset + 1 < len in
-        let has_b2 = offset + 2 < len in
-        let b1 = if has_b1 then Char.code text.[offset + 1] else 0 in
-        let b2 = if has_b2 then Char.code text.[offset + 2] else 0 in
-        add (b0 lsr 2);
-        add (((b0 land 0x03) lsl 4) lor (b1 lsr 4));
-        if has_b1 then add (((b1 land 0x0f) lsl 2) lor (b2 lsr 6))
-        else Buffer.add_char output '=';
-        if has_b2 then add (b2 land 0x3f) else Buffer.add_char output '=';
-        loop (offset + 3))
-    in
-    loop 0;
-    Buffer.contents output
 
   let base64_decode text =
     let value = function
